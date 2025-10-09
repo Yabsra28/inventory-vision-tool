@@ -1,4 +1,4 @@
-const KAFKA_API_URL = (import.meta.env.MODE === 'development') ? '/kafka' : import.meta.env.VITE_KAFKA_API_URL;
+const KAFKA_API_URL = import.meta.env.MODE === 'development' ? '/kafka' : (import.meta.env.VITE_KAFKA_API_URL || undefined);
 
 export interface ConsumeRequest {
   topic: string;
@@ -18,6 +18,10 @@ export async function consumeKafkaTopic(
   limit: number = 5000,
   autoOffsetReset: string = 'earliest'
 ): Promise<any[]> {
+  if (!KAFKA_API_URL) {
+    throw new Error('Kafka API URL is not configured. Please set VITE_KAFKA_API_URL in your .env file.');
+  }
+
   try {
     const payload: ConsumeRequest = {
       topic,
@@ -76,6 +80,10 @@ export async function consumeKafkaTopic(
 // and whether the server is allowing cross-origin requests. Returns an object
 // with { ok, status, corsBlocked, error }
 export async function checkKafkaApi(): Promise<{ ok: boolean; status?: number; corsBlocked?: boolean; error?: string }>{
+  if (!KAFKA_API_URL) {
+    return { ok: false, error: 'Kafka API URL is not configured.' };
+  }
+
   try {
     // Send a minimal consume request with small limit so the server can respond quickly
     const testPayload = { topic: 'scm_requests', group_id: `scm_check_${Date.now()}`, auto_offset_reset: 'latest', limit: 1 };

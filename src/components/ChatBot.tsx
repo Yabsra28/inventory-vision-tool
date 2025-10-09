@@ -265,6 +265,11 @@ export function ChatBot() {
 
         const data = await response.json();
 
+        // Log token usage if available
+        if (data.usage) {
+          console.log('Gemini API Token Usage:', data.usage);
+        }
+
         if (data.candidates && data.candidates.length > 0 && data.candidates[0].content && data.candidates[0].content.parts && data.candidates[0].content.parts.length > 0) {
           const content = data.candidates[0].content.parts[0].text;
           if (content && content.trim()) {
